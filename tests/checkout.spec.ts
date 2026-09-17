@@ -13,7 +13,9 @@ const buyer = {
  * summary, and the form validation that guards it.
  */
 test.describe('Checkout', () => {
-  test('completes an end-to-end purchase from login to confirmation', async ({
+  test('completes an end-to-end purchase from login to confirmation', {
+    tag: ['@p0', '@smoke', '@regression', '@checkout'],
+  }, async ({
     loggedInInventoryPage: inventory,
     cartPage,
     checkoutPage,
@@ -40,7 +42,9 @@ test.describe('Checkout', () => {
     await expect(checkoutPage.completeHeader).toHaveText('Thank you for your order!');
   });
 
-  test('order total equals item subtotal plus tax', async ({
+  test('order total equals item subtotal plus tax', {
+    tag: ['@p0', '@smoke', '@regression', '@checkout'],
+  }, async ({
     loggedInInventoryPage: inventory,
     cartPage,
     checkoutPage,
@@ -59,7 +63,9 @@ test.describe('Checkout', () => {
     expect(total).toBeCloseTo(subtotal + tax, 2);
   });
 
-  test('checkout requires buyer information', async ({
+  test('checkout requires buyer information', {
+    tag: ['@p2', '@regression', '@checkout'],
+  }, async ({
     loggedInInventoryPage: inventory,
     cartPage,
     checkoutPage,

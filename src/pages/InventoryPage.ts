@@ -45,6 +45,18 @@ export class InventoryPage extends BasePage {
     return this.page.locator('[data-test="product-sort-container"]');
   }
 
+  /** All product images on the catalog. */
+  get itemImages(): Locator {
+    return this.page.locator('.inventory_item_img img');
+  }
+
+  /** The `src` of every product image, in listing order. */
+  async imageSources(): Promise<string[]> {
+    return this.itemImages.evaluateAll((imgs) =>
+      imgs.map((img) => (img as HTMLImageElement).getAttribute('src') ?? ''),
+    );
+  }
+
   /** The "Add to cart" button for a given product name. */
   addToCartButton(productName: string): Locator {
     return this.page.locator(`[data-test="add-to-cart-${toProductId(productName)}"]`);

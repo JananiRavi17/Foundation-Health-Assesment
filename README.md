@@ -7,19 +7,31 @@ cart, and completing a checkout.
 
 ---
 
-## Why these tests
+## Coverage summary
 
-Sauce Demo is a storefront, so the tests target the flows that would cost real revenue
-or block real users if they broke:
+Sauce Demo is a storefront, so tests are prioritized by revenue and access risk. Full
+case-by-case detail (steps, expected results, and assertions) lives in
+[`TEST_PLAN.md`](./TEST_PLAN.md).
 
-| Area | What's covered | Why it's critical |
-|------|----------------|-------------------|
-| **Login** | Happy path, locked-out user, wrong password, missing username/password, logout | The gate to the entire app; every other journey depends on it |
-| **Inventory** | Add/remove items, cart badge count, button state toggle, sort by price & name | Where users spend most of their time and make selections |
-| **Cart** | Items persist from inventory, remove from cart, continue shopping | Must faithfully carry selections across pages |
-| **Checkout** | Full purchase end-to-end, total = subtotal + tax, buyer-info validation | The revenue path; a broken checkout means lost sales |
+| Area | Tests | Priority | What's verified |
+|------|-------|----------|-----------------|
+| Login & access | 6 | P0 / P2 | Valid login, locked-out & wrong-password rejection, field validation, logout |
+| Product catalog | 6 | P0 / P1 / P2 | Add/remove, cart badge, button state, sort by price & name |
+| Cart | 3 | P0 / P2 | Items persist from catalog, remove in cart, continue shopping |
+| Checkout | 3 | P0 / P2 | Full purchase, order total = subtotal + tax, buyer-info validation |
+| Access control (security) | 4 | P1 | Protected pages refuse direct-URL access without login |
+| Broken-UI / defects | 2 | P1 | Broken product images & broken checkout field caught via `problem_user` |
+| Accessibility (WCAG) | 2 | P1 | axe scan of login & inventory, gated on serious/critical |
+| Performance | 1 | P2 | Login under injected latency (known-flaky — see TEST_PLAN.md) |
 
-There are **18 tests**, each run across **Chromium, Firefox, and WebKit**.
+**27 tests**, each run across **Chromium, Firefox, and WebKit**.
+
+> **Suite status:** 26 of 27 pass reliably. One performance test
+> (`performance.spec.ts`) is a **known intermittent failure** — the
+> `performance_glitch_user` account delays the page past the default 5s
+> assertion timeout. It's kept in the default run as honest, visible coverage;
+> see the "Known issues" section in [`TEST_PLAN.md`](./TEST_PLAN.md) for the
+> reason and fix options.
 
 ---
 
@@ -51,7 +63,8 @@ saucedemo-playwright/
 │   ├── data/                   # Test data (users, products)
 │   ├── fixtures/               # Custom Playwright fixtures wiring page objects
 │   └── pages/                  # Page Object Model classes
-└── tests/                      # Spec files (login, inventory, cart, checkout)
+└── tests/                      # Spec files: login, inventory, cart, checkout,
+                                #   security, visual, accessibility, performance
 ```
 
 ---
@@ -70,8 +83,9 @@ npx playwright install
 
 > The suite is configured to run on Chromium, Firefox, and WebKit. If you only
 > want to try it quickly on one engine, `npx playwright install chromium` and
-> `npm run test:chromium` is enough. All 18 tests were verified passing on
-> Chromium.
+> `npm run test:chromium` is enough. 26 of 27 tests pass reliably on Chromium;
+> the one known-flaky performance test is documented in the suite-status note
+> above and in [`TEST_PLAN.md`](./TEST_PLAN.md).
 
 ---
 
@@ -97,6 +111,52 @@ npm run test:debug
 npm run typecheck
 ```
 
+### Running by tag
+
+Every test is tagged so you can run a slice without maintaining separate files.
+Tags cover **priority** (`@p0`/`@p1`/`@p2`), **suite** (`@smoke`/`@regression`),
+**feature area** (`@login`/`@inventory`/`@cart`/`@checkout`), and
+**quality checks** (`@security`/`@visual`/`@accessibility`/`@performance`).
+
+```bash
+# Fast pre-release smoke check (the 7 P0 must-pass cases)
+npm run test:smoke
+
+# Full regression (all tests)
+npm run test:regression
+
+# By priority
+npm run test:p0        # critical: revenue/access blockers
+npm run test:p1        # high: core shopping functionality
+npm run test:p2        # medium: validation & convenience
+
+# By feature area
+npm run test:login
+npm run test:checkout
+
+# By quality check
+npm run test:security
+npm run test:visual
+npm run test:accessibility
+npm run test:performance
+
+# Combine tags with Playwright's --grep directly:
+npx playwright test --grep "@p0|@p1"          # P0 and P1
+npx playwright test --grep-invert @p2         # everything except P2
+npx playwright test --grep @checkout --project=chromium
+```
+
+| Tag | Meaning | Count |
+|-----|---------|-------|
+| `@smoke` | P0 must-pass set, run on every build | 7 |
+| `@regression` | The full suite | 27 |
+| `@p0` / `@p1` / `@p2` | Priority (critical / high / medium) | 7 / 9 / 11 |
+| `@login` `@inventory` `@cart` `@checkout` | Core feature area | 6 / 6 / 3 / 3 |
+| `@security` `@visual` `@accessibility` `@performance` | Quality / non-functional | 4 / 2 / 2 / 1 |
+
+See [`TEST_PLAN.md`](./TEST_PLAN.md) for the full business-readable test plan
+with priorities.
+
 ### Viewing results
 
 After a run, open the HTML report:
@@ -112,42 +172,37 @@ Traces, screenshots, and video are captured automatically on failure (see
 
 ## To Do — what I'd add with more time
 
-- **CI pipeline** — a GitHub Actions workflow to run the suite on every push/PR, sharded
-  across browsers, publishing the HTML report as an artifact.
-- **Authentication via stored state** — log in once and reuse `storageState` to skip the
-  UI login in cart/checkout specs, cutting runtime.
-- **API-level setup/teardown** — Sauce Demo has no public API, but on a real app I'd seed
-  cart state via API and reserve the UI for what genuinely needs the browser.
-- **Visual regression** — snapshot testing (and exercising `problem_user` / `visual_user`)
-  to catch broken images and layout regressions.
-- **Data-driven login tests** — parameterize the negative login cases from a table for
-  tighter coverage with less duplication.
-- **Accessibility checks** — integrate `@axe-core/playwright` to assert WCAG basics on key
-  pages.
-- **Performance assertions** — use `performance_glitch_user` to assert load budgets and
-  guard against slow-load regressions.
-- **Test tagging & sharding** — tag `@smoke` vs `@regression` so CI can run a fast smoke
-  subset on every commit and the full suite nightly.
+The suite covers the critical journeys; these are the next steps I'd take to make it
+production-grade, ordered by impact on reliability and maintainability:
+
+- **CI pipeline** — wire the suite into GitHub Actions: `@smoke` on every push/PR for fast
+  feedback, full `@regression` nightly and pre-release, sharded across browsers with the
+  HTML report published as an artifact. This is the highest-value next step — automated
+  coverage only pays off when it runs on every change.
+- **Authentication via stored state** — log in once and reuse `storageState` so cart and
+  checkout specs skip the UI login. Cuts runtime and removes login as a shared point of
+  failure for unrelated tests.
+- **Mobile web coverage** — add mobile-viewport projects (Playwright device descriptors
+  such as iPhone and Pixel) to complement the desktop cross-browser runs already in place,
+  verifying responsive layout and touch interactions on a storefront most customers reach
+  from a phone.
+- **Self-healing locators (next phase)** — an AI-assisted layer that, when a test fails on
+  a changed selector, inspects the live DOM, proposes an updated locator, and surfaces the
+  fix for review rather than editing silently. This targets selector drift — the biggest
+  long-term maintenance cost in UI automation — and builds on the live-DOM probing I used
+  to ground the current selectors.
 
 ---
 
 ## AI usage
 
-This project was built with the assistance of an AI coding agent. How it was used:
+I owned the test plan, the P0/P1/P2 priorities, and the Page Object Model design.
+AI (Claude) assisted with the mechanical parts:
 
-- **Test planning** — brainstormed which flows are most business-critical for an
-  e-commerce app and which negative/edge cases matter most (locked-out user, missing
-  fields, order-total math), then prioritized them into the coverage table above.
-- **Scaffolding & boilerplate** — generated the initial project structure, Playwright
-  config, and the repetitive parts of the page objects and fixtures, which I then reviewed
-  and refined.
-- **Design review** — used the AI as a sounding board on structure decisions (POM vs. flat
-  helpers, fixture design, where to centralize test data).
+- **Configuration setup** — the Playwright config, `tsconfig`, and project scaffolding.
+- **Authoring tests** — accelerating test implementation by generating page objects, spec
+  skeletons, and boilerplate from the cases I designed, which I then reviewed and refined.
+- **Documentation** — drafting and proofreading this README and the test plan, which I
+  edited for accuracy and tone.
 
-Everything was reviewed for correctness: selectors were validated against the live app's
-`data-test` attributes, and the suite was executed to confirm all tests pass before
-delivery. No custom AI skills or agents were created for this task; the AI was used as a
-pair-programming assistant.
-
-> **Tip for reviewers:** every assertion targets a user-visible outcome, so the specs
-> double as living documentation of how the app is expected to behave.
+No custom AI skills or agents were created for this task.

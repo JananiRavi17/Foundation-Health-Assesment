@@ -6,7 +6,9 @@ import { products } from '../src/data/products.js';
  * tests verify items persist into the cart and can be removed from there.
  */
 test.describe('Shopping cart', () => {
-  test('items added on the inventory page appear in the cart', async ({
+  test('items added on the inventory page appear in the cart', {
+    tag: ['@p0', '@smoke', '@regression', '@cart'],
+  }, async ({
     loggedInInventoryPage: inventory,
     cartPage,
     page,
@@ -26,7 +28,9 @@ test.describe('Shopping cart', () => {
     expect(names).toContain(products.fleeceJacket);
   });
 
-  test('removing an item from the cart updates its contents', async ({
+  test('removing an item from the cart updates its contents', {
+    tag: ['@p2', '@regression', '@cart'],
+  }, async ({
     loggedInInventoryPage: inventory,
     cartPage,
   }) => {
@@ -43,7 +47,9 @@ test.describe('Shopping cart', () => {
     expect(names).toContain(products.fleeceJacket);
   });
 
-  test('continue shopping returns the user to the inventory page', async ({
+  test('continue shopping returns the user to the inventory page', {
+    tag: ['@p2', '@regression', '@cart'],
+  }, async ({
     loggedInInventoryPage: inventory,
     cartPage,
     page,

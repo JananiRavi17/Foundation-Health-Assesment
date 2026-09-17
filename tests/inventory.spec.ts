@@ -6,7 +6,9 @@ import { products } from '../src/data/products.js';
  * removing, and sorting are the core interactions and must stay correct.
  */
 test.describe('Inventory page', () => {
-  test('adding an item updates the cart badge and toggles the button to Remove', async ({
+  test('adding an item updates the cart badge and toggles the button to Remove', {
+    tag: ['@p0', '@smoke', '@regression', '@inventory'],
+  }, async ({
     loggedInInventoryPage: inventory,
   }) => {
     // Cart starts empty (no badge shown).
@@ -20,7 +22,9 @@ test.describe('Inventory page', () => {
     await expect(inventory.addToCartButton(products.backpack)).toHaveCount(0);
   });
 
-  test('adding multiple items accumulates the cart count', async ({
+  test('adding multiple items accumulates the cart count', {
+    tag: ['@p1', '@regression', '@inventory'],
+  }, async ({
     loggedInInventoryPage: inventory,
   }) => {
     await inventory.addToCart(products.backpack);
@@ -30,7 +34,9 @@ test.describe('Inventory page', () => {
     await expect(inventory.cartBadge).toHaveText('3');
   });
 
-  test('removing an item from the inventory page decrements the cart', async ({
+  test('removing an item from the inventory page decrements the cart', {
+    tag: ['@p2', '@regression', '@inventory'],
+  }, async ({
     loggedInInventoryPage: inventory,
   }) => {
     await inventory.addToCart(products.backpack);
@@ -44,7 +50,9 @@ test.describe('Inventory page', () => {
     await expect(inventory.addToCartButton(products.backpack)).toBeVisible();
   });
 
-  test('sorting by price low-to-high orders products ascending', async ({
+  test('sorting by price low-to-high orders products ascending', {
+    tag: ['@p2', '@regression', '@inventory'],
+  }, async ({
     loggedInInventoryPage: inventory,
   }) => {
     await inventory.sortBy('lohi');
@@ -54,7 +62,9 @@ test.describe('Inventory page', () => {
     expect(prices).toEqual(sorted);
   });
 
-  test('sorting by price high-to-low orders products descending', async ({
+  test('sorting by price high-to-low orders products descending', {
+    tag: ['@p2', '@regression', '@inventory'],
+  }, async ({
     loggedInInventoryPage: inventory,
   }) => {
     await inventory.sortBy('hilo');
@@ -64,7 +74,9 @@ test.describe('Inventory page', () => {
     expect(prices).toEqual(sorted);
   });
 
-  test('sorting by name Z-to-A orders products in reverse alphabetical order', async ({
+  test('sorting by name Z-to-A orders products in reverse alphabetical order', {
+    tag: ['@p2', '@regression', '@inventory'],
+  }, async ({
     loggedInInventoryPage: inventory,
   }) => {
     await inventory.sortBy('za');

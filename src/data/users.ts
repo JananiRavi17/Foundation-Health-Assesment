@@ -37,4 +37,16 @@ export const users = {
     password: PASSWORD,
     description: 'Adds latency, useful for slow-load resilience',
   },
+  /** Certain actions error out (e.g. sorting), useful for error-handling checks. */
+  error: {
+    username: 'error_user',
+    password: PASSWORD,
+    description: 'Some interactions fail, useful for error-path testing',
+  },
+  /** Ships subtle visual defects (mispositioned/broken elements). */
+  visual: {
+    username: 'visual_user',
+    password: PASSWORD,
+    description: 'Has intentional visual regressions',
+  },
 } as const satisfies Record<string, TestUser>;

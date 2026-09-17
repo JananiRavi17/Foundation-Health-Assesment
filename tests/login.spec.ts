@@ -10,7 +10,9 @@ test.describe('Login flow', () => {
     await loginPage.goto();
   });
 
-  test('standard user logs in and lands on the inventory page', async ({
+  test('standard user logs in and lands on the inventory page', {
+    tag: ['@p0', '@smoke', '@regression', '@login'],
+  }, async ({
     loginPage,
     inventoryPage,
     page,
@@ -25,7 +27,9 @@ test.describe('Login flow', () => {
     await expect(inventoryPage.items).toHaveCount(6);
   });
 
-  test('locked-out user is rejected with a clear error', async ({ loginPage, page }) => {
+  test('locked-out user is rejected with a clear error', {
+    tag: ['@p0', '@smoke', '@regression', '@login'],
+  }, async ({ loginPage, page }) => {
     await loginPage.loginAs(users.lockedOut);
 
     // Stay on the login screen and surface the lockout reason.
@@ -34,7 +38,9 @@ test.describe('Login flow', () => {
     await expect(loginPage.errorMessage).toContainText('locked out');
   });
 
-  test('wrong password is rejected', async ({ loginPage }) => {
+  test('wrong password is rejected', {
+    tag: ['@p0', '@smoke', '@regression', '@login'],
+  }, async ({ loginPage }) => {
     await loginPage.login(users.standard.username, 'wrong_password');
 
     await expect(loginPage.errorMessage).toBeVisible();
@@ -43,21 +49,27 @@ test.describe('Login flow', () => {
     );
   });
 
-  test('missing username is rejected', async ({ loginPage }) => {
+  test('missing username is rejected', {
+    tag: ['@p2', '@regression', '@login'],
+  }, async ({ loginPage }) => {
     await loginPage.fillPassword(PASSWORD);
     await loginPage.submit();
 
     await expect(loginPage.errorMessage).toContainText('Username is required');
   });
 
-  test('missing password is rejected', async ({ loginPage }) => {
+  test('missing password is rejected', {
+    tag: ['@p2', '@regression', '@login'],
+  }, async ({ loginPage }) => {
     await loginPage.fillUsername(users.standard.username);
     await loginPage.submit();
 
     await expect(loginPage.errorMessage).toContainText('Password is required');
   });
 
-  test('user can log out and is returned to the login screen', async ({
+  test('user can log out and is returned to the login screen', {
+    tag: ['@p2', '@regression', '@login'],
+  }, async ({
     loginPage,
     inventoryPage,
     page,

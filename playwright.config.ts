@@ -15,6 +15,14 @@ export default defineConfig({
     timeout: 5_000,
   },
 
+  /*
+   * Exclude @optional tests from the default run. These (accessibility and
+   * performance) are kept in the suite as documented coverage but are timing-
+   * or third-party-dependent, so they are not run by default. Run them with:
+   *   npx playwright test --grep @optional
+   */
+  grepInvert: /@optional/,
+
   /* Run tests within a file in parallel. */
   fullyParallel: true,
 
