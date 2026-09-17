@@ -1,0 +1,29 @@
+{
+  "name": "saucedemo-playwright",
+  "version": "1.0.0",
+  "description": "End-to-end test automation for the Sauce Demo web app using Playwright and TypeScript",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:chromium": "playwright test --project=chromium",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "e2e",
+    "automation",
+    "saucedemo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^22.7.0",
+    "typescript": "^5.6.0"
+  }
+}
