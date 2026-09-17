@@ -5,6 +5,12 @@ End-to-end UI test automation for [Sauce Demo](https://www.saucedemo.com/), buil
 business-critical journeys of the app: browsing/sorting the catalog, managing the
 cart, and completing a checkout.
 
+> **Scope note:** The brief asks for the login flow plus at least three critical tests.
+> I treated **login, cart, and checkout** as the core deliverable, then deliberately
+> layered additional risk-based coverage (access control, broken-UI defects, accessibility,
+> and performance) to show how I'd prioritize and structure a suite on a real project. The
+> priority rationale is in [`TEST_PLAN.md`](./TEST_PLAN.md).
+
 ---
 
 ## Coverage summary
